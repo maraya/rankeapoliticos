@@ -63,7 +63,7 @@
 				into politicos
 					(poli_id, poli_nombre)
 				values
-					(".$id.", '".$nombre."')";
+					(".$poli_id.", '".$nombre."')";
 		$stmt = $db->prepare($sql);
 		$stmt->execute();
 	} else {
