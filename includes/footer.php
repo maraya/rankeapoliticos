@@ -2,7 +2,7 @@
 		<hr />
 	
 		<div class="footer">
-			<p></p>
+			<p>Hosting por <a target="_blank" href="http://fonlitzer.com">fonlitzer.com</a></p>
 		</div>
 	</div>
 	
