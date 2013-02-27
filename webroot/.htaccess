@@ -6,5 +6,6 @@
 	RewriteRule ^ranking$ index.php?__sec=ranking
 	RewriteRule ^nada$ index.php?__sec=nada
 	RewriteRule ^faq$ index.php?__sec=faq
+	RewriteRule ^contacto$ index.php?__sec=contacto
 	RewriteRule ^(\d{2}-\d{2}-\d{4})/(\d{2}:\d{2})$ index.php?__fecha=$1&__hora=$2
 </IfModule>
