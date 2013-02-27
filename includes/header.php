@@ -7,6 +7,7 @@
 	<meta property="og:image" content="http://rankeapoliticos.cl/img/fb-icon.png" /> 
 	<meta property="og:url" content="http://rankeapoliticos.cl" /> 
 	<meta property="fb:admins" content="1185063875"/>
+	<meta property="fb:app_id" content="123861350968148"/>
 	<title>Rankea políticos!</title>
 	<link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet">
 	<link href="/css/style.css" type="text/css" rel="stylesheet">
