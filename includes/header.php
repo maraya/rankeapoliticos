@@ -5,7 +5,8 @@
 	<meta property="og:title" content="Rankea políticos!" />
 	<meta property="og:type" content="cause" />
 	<meta property="og:image" content="http://rankeapoliticos.cl/img/fb-icon.png" /> 
-	<meta property="fb:admins" content="marayagomez"/>
+	<meta property="og:url" content="http://rankeapoliticos.cl" /> 
+	<meta property="fb:admins" content="1185063875"/>
 	<title>Rankea políticos!</title>
 	<link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet">
 	<link href="/css/style.css" type="text/css" rel="stylesheet">
