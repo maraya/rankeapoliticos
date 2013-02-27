@@ -11,6 +11,8 @@
 	<title>Rankea políticos!</title>
 	<link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet">
 	<link href="/css/style.css" type="text/css" rel="stylesheet">
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
 	<script src="/js/jquery.min.js" type="text/javascript"></script>
 	<script src="/js/bootstrap.min.js" type="text/javascript"></script>
 	<script src="/js/global.js" type="text/javascript"></script>
