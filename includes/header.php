@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-	<title>Rankea tu político!</title>
+	<title>Rankea políticos!</title>
 	<link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet">
 	<link href="/css/style.css" type="text/css" rel="stylesheet">
 	<script src="/js/jquery.min.js" type="text/javascript"></script>
