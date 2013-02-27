@@ -34,6 +34,8 @@
 	$proc_id = $index_info['info']['proc_id'];
 ?>
 
+<div id="fb-root"></div>
+
 <div class="ganador">
 	<h2>Para el día <?php echo date("d-m-Y", strtotime($init_fecha)); ?> (entre las <?php echo date("H:i", strtotime($init_fecha)); ?> y las <?php echo date("H:i", strtotime($end_fecha)); ?>)</h2>
 	<h2>El ganador es:</h2>
@@ -94,11 +96,10 @@
 				  fjs.parentNode.insertBefore(js, fjs);
 				}(document, 'script', 'facebook-jssdk'));
 			</script>
-			<div class="fb-like" data-send="true" data-width="280" data-show-faces="true"></div>
+			<div class="fb-like" data-href="http://rankeapoliticos.cl" data-send="true" data-width="280" data-show-faces="true"></div>
 		</div>
 	
 		<div class="span8">
-			<div id="fb-root"></div>
 			<script>
 				(function(d, s, id) {
 				  var js, fjs = d.getElementsByTagName(s)[0];
@@ -116,8 +117,7 @@
 				$fecha = $date->format("d-m-Y");
 				$hora = $date->format("H:i");
 			?>
-			<div class="fb-comments" data-href="http://rankeapoliticos.cl/<?php echo $fecha; ?>/<?php echo $hora; ?>" data-width="470" data-num-posts="10"></div>
-			
+			<div class="fb-comments" data-href="http://rankeapoliticos.cl/<?php echo $fecha; ?>/<?php echo $hora; ?>" data-width="562" data-num-posts="10"></div>
 		</div>
 	</div>
 </div>
