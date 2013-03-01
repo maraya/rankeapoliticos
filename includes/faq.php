@@ -9,7 +9,7 @@
 <p>Bueno, eso hay que preguntarselo a los diarios!, de todas formas, espérate en época de elecciones (van a salir todos).</p>
 <br />
 <h3>Oye, tengo un sitio/diario. ¿Como puedo hacer para que salgan los titulares acá?</h3>
-<p>La dura?... <a target="_blank" href="https://github.com/maraya">aquí</a> están mis datos de contacto.</p>
+<p>La dura?... puedes contactarme <a href="/contacto">aquí</a>.</p>
 <br />
 <h3>¿Cada cuanto se realiza la búsqueda en los diarios?</h3>
 <p>Cada 4 horas, a las 00:00, 04:00, 08:00, 12:00, 16:00, 20:00.</p>
