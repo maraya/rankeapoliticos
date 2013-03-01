@@ -1,6 +1,8 @@
 <?php
+	require_once dirname(dirname(__FILE__))."/config/config.php";
 	require_once dirname(dirname(__FILE__))."/class/DB.php";
 	require_once dirname(dirname(__FILE__))."/class/Main.php";
+	require_once dirname(dirname(__FILE__))."/class/MemcacheClient.php";
 	require_once dirname(dirname(__FILE__))."/includes/functions.php";
 	require_once dirname(dirname(__FILE__))."/includes/session.php";
 	
@@ -17,9 +19,14 @@
 	} else {
 		list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
 		
-		$memcache = new Memcache();
-		$memcache->pconnect($memcache_host, $memcache_port);
-		$index_info = $memcache->get("index_info");
+		if (isset($_GET['__lugar'])) {
+			$lugar = htmlentities($_GET['__lugar']);
+		} else {
+			$lugar = null;
+		}
+		
+		$memcache = new MemcacheClient();
+		$index_info = $memcache->get("index_info", $lugar);
 		$memcache->close();
 	}
 	
