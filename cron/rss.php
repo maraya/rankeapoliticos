@@ -4,15 +4,39 @@
 	//error_reporting(0);
 	set_time_limit(0);
 	require_once "XML/RSS.php";
+	require_once dirname(dirname(__FILE__))."/config/config.php";
 	require_once dirname(dirname(__FILE__))."/class/DB.php";
+	require_once dirname(dirname(__FILE__))."/class/Politico.php";
+	require_once dirname(dirname(__FILE__))."/class/Fuente.php";
 	require_once dirname(dirname(__FILE__))."/includes/functions.php";
-		
-	$regexp_politicos = "/".implode("|", $politicos)."/";	
-	$info_rss = array();
-	$total_titulares = 0;
 	
-	foreach ($rss_url as $rss) {
-		$rss = new XML_RSS($rss);
+	// constructores
+	$db = new DB();
+	$poli = new Politico();
+	$fuen = new Fuente();
+	
+	// sacamos los políticos de la BD
+	$politicos = $poli->getPoliticos();
+	
+	foreach ($politicos as $row) {
+		$poli_list[] = $row['poli_nombre'];
+	}
+	
+	// regexp
+	$regexp_politicos = "/".implode("|", $poli_list)."/";	
+	$info_rss = array();
+	
+	// busqueda de los políticos en los titulares de las fuentes
+	// generamos estadísticas y titulares también
+	$fuentes = $fuen->getfuentes();
+	$estadisticas = array();
+	$titulares = array();
+	
+	foreach ($fuentes as $row) {
+		$rss_url = $row['fuen_url'];
+		$rss_fuente = $row['fuen_id'];
+	
+		$rss = new XML_RSS($rss_url);
 		$rss->parse();
 		
 		foreach ($rss->getItems() as $item) {
@@ -21,54 +45,24 @@
 			
 			if (preg_match($regexp_politicos, $title . $description, $matches)) {
 				$index = array_pop($matches);
-				$item['nombre'] = $index;
-				$item['description'] = $description;
-				$info_rss[$index][] = $item;
+				
+				// datos de frecuencia
+				$poli_id = $poli->getPoliId($index);
+				if (!isset($estadisticas[$rss_fuente][$poli_id])) {
+					$estadisticas[$rss_fuente][$poli_id] = 1;
+				} else {
+					$estadisticas[$rss_fuente][$poli_id] = $estadisticas[$rss_fuente][$poli_id]+1;
+				}
+				
+				$titulares[$poli_id]['poli_id'] = $poli_id;
+				$titulares[$poli_id]['poli_nombre'] = $index;
+				$titulares[$poli_id]['titulares'][] = $item;
 			}
-			$total_titulares++;
 		}
 	}
 	
-	// ordenamos segun cantidad de titulares de mayor a menor
-	$count = array();
-	foreach ($info_rss as $key => $val) {
-		$count[$key] = sizeof($val);
-	}
-	arsort($count);
-	$keys = array_keys($count);
-	$nombre = $keys[0];
-	
-	// instancia clase DB
-	$db = new DB();
-	
-	// guardamos politicos inexistentes
-	$sql = "select * from politicos";
-	$stmt = $db->prepare($sql);
-	$stmt->execute();
-	$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-	
-	$politicos_db = array();
-	foreach ($res as $row) {
-		$politicos_db[$row['poli_nombre']] = array('id' => $row['poli_id'], 'nombre' => $row['poli_nombre']);
-	}
-	
-	if (!in_array($nombre, array_keys($politicos_db))) {
-		$sql = "select coalesce(max(poli_id), 0)+1 as id from politicos";
-		$stmt = $db->prepare($sql);
-		$stmt->execute();
-		$row = $stmt->fetch(PDO::FETCH_ASSOC);
-		$poli_id = $row['id'];
-	
-		$sql = "insert
-				into politicos
-					(poli_id, poli_nombre)
-				values
-					(".$poli_id.", '".$nombre."')";
-		$stmt = $db->prepare($sql);
-		$stmt->execute();
-	} else {
-		$poli_id = $politicos_db[$nombre]['id'];
-	}
+	// inicio transacción
+	$db->beginTransaction();
 	
 	// guardamos proceso
 	$sql = "select coalesce(max(proc_id), 0)+1 as id from procesos";
@@ -80,36 +74,88 @@
 	list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
 	$sql = "insert
 			into procesos 
-				(proc_id, proc_desde, proc_hasta, poli_id, proc_total_titulares)
+				(proc_id, proc_desde, proc_hasta)
 			values
-				(".$proc_id.", '".$init_fecha."', '".$end_fecha."', ".$poli_id.", ".$total_titulares.")";
-	$stmt = $db->prepare($sql);
+				(".$proc_id.", '".$init_fecha."', '".$end_fecha."')";
+				
+	if (!$db->exec($sql)) {
+		$db->rollback();
+		print_r($stmt->errorInfo());
+	}
 	
-	if (!$stmt->execute()) {
+	// guardamos estadísticas
+	$sql = "insert into estadisticas (proc_id, poli_id, fuen_id, esta_cant_titulares) values ";
+	$values = array();
+	
+	foreach ($estadisticas as $fuen_id => $info) {
+		foreach ($info as $poli_id => $cant_titulares) {
+			$values[] = sprintf("(%d, %d, %d, %d)", $proc_id, $poli_id, $fuen_id, $cant_titulares);
+		}
+	}
+	$sql .= implode(", ", $values);
+	
+	if (!$db->exec($sql)) {
+		$db->rollback();
 		print_r($stmt->errorInfo());
 	}
 	
 	// guardamos titulares
-	$values = array();
-	$cron_date = date("Y-m-d H:i:s");
-	$i = 1;
-	foreach ($info_rss[$nombre] as $titu) {
-		$max = "select coalesce(max(titu_id), 0)+".$i." as id from titulares";
-		$titu['pubdate'] = date("Y-m-d H:i:s", strtotime($titu['pubdate']));
-		$values[] =  "((".$max."), ".$proc_id.", '".addslashes($titu['title'])."', '".addslashes($titu['description'])."', '".$titu['link']."', '".$titu['pubdate']."', '".$cron_date."')";
-		$i++;
-	}
-	
 	$sql = "insert
 			into titulares
-				(titu_id, proc_id, titu_titulo, titu_contenido, titu_link, titu_post_fecha, titu_fecha)
-			values
-				".implode(", ", $values);
-	$stmt = $db->prepare($sql);
+				(titu_id, proc_id, titu_titulo, titu_contenido, titu_link, titu_post_fecha, poli_id)
+			values ";
 	
-	if (!$stmt->execute()) {
-		print_r($stmt->errorInfo());
+	$i = 1;
+	$values = array();
+	foreach ($titulares as $row) {
+		$poli_id = $row['poli_id'];
+		
+		foreach ($row['titulares'] as $titu) {
+			$max = "select coalesce(max(titu_id), 0)+".$i." as id from titulares";
+			
+			//echo $titu['pubdate']."\n";
+			
+			$titu['pubdate'] = date("Y-m-d H:i:s", strtotime($titu['pubdate']));
+			
+			$values[] =  "((".$max."), ".$proc_id.", '".addslashes($titu['title'])."', '".addslashes($titu['description'])."', '".$titu['link']."', '".$titu['pubdate']."', ".$poli_id.")";
+			$i++;
+		}
+	
 	}
+	
+	$sql .= implode(", ", $values);
+	
+	if (!$db->exec($sql)) {
+		print_r($stmt->errorInfo());
+		$db->rollback();
+	}
+	
+	
+	$db->rollback();
+	
+	exit;
+	
+	
+	
+	// ordenamos segun cantidad de titulares de mayor a menor
+	$order = array();
+	foreach ($titulares as $row) {
+		$order[$row['poli_id']] = 
+		
+	}
+	
+	
+	$count = array();
+	foreach ($info_rss as $key => $val) {
+		$count[$key] = sizeof($val);
+	}
+	arsort($count);
+	$keys = array_keys($count);
+	$nombre = $keys[0];
+	
+	
+	
+	
 	
 	// array info
 	$index_info = array(
