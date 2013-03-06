@@ -80,7 +80,9 @@
 				// armamos estructura
 				$titulares[$poli_id]['poli_id'] = $poli_id;
 				$titulares[$poli_id]['proc_id'] = $proc_id;
+				$titulares[$poli_id]['fuen_id'] = $rss_fuente;
 				$titulares[$poli_id]['poli_nombre'] = $index;
+				$item['description'] = $description;
 				$titulares[$poli_id]['titulares'][] = $item;
 			}
 		}
@@ -105,13 +107,14 @@
 	// guardamos titulares
 	$sql = "insert
 			into titulares
-				(titu_id, proc_id, titu_titulo, titu_contenido, titu_link, titu_post_fecha, poli_id)
+				(titu_id, proc_id, fuen_id, titu_titulo, titu_contenido, titu_link, titu_post_fecha, poli_id)
 			values ";
 	
 	$i = 1;
 	$values = array();
 	foreach ($titulares as $row) {
 		$poli_id = $row['poli_id'];
+		$fuen_id = $row['fuen_id'];
 		
 		foreach ($row['titulares'] as $titu) {
 			$max = "select coalesce(max(titu_id), 0)+".$i." as id from titulares";
@@ -120,7 +123,7 @@
 			
 			$titu['pubdate'] = date("Y-m-d H:i:s", strtotime($titu['pubdate']));
 			
-			$values[] =  "((".$max."), ".$proc_id.", '".addslashes($titu['title'])."', '".addslashes($titu['description'])."', '".$titu['link']."', '".$titu['pubdate']."', ".$poli_id.")";
+			$values[] =  "((".$max."), ".$proc_id.", ".$fuen_id.", '".addslashes($titu['title'])."', '".addslashes($titu['description'])."', '".$titu['link']."', '".$titu['pubdate']."', ".$poli_id.")";
 			$i++;
 		}
 	
