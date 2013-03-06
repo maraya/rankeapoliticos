@@ -8,6 +8,7 @@
 	require_once dirname(dirname(__FILE__))."/class/DB.php";
 	require_once dirname(dirname(__FILE__))."/class/Politico.php";
 	require_once dirname(dirname(__FILE__))."/class/Fuente.php";
+	require_once dirname(dirname(__FILE__))."/class/MemcacheClient.php";
 	require_once dirname(dirname(__FILE__))."/includes/functions.php";
 	
 	// constructores
@@ -15,11 +16,33 @@
 	$poli = new Politico();
 	$fuen = new Fuente();
 	
+	// inicio transacción
+	$db->beginTransaction();
+	
+	// guardamos proceso
+	$sql = "select coalesce(max(proc_id), 0)+1 as id from procesos";
+	$stmt = $db->prepare($sql);
+	$stmt->execute();
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	$proc_id = $row['id'];
+	
+	list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
+	$sql = "insert
+			into procesos 
+				(proc_id, proc_desde, proc_hasta)
+			values
+				(".$proc_id.", '".$init_fecha."', '".$end_fecha."')";
+				
+	if (!$db->exec($sql)) {
+		$db->rollback();
+		print_r($stmt->errorInfo());
+	}
+	
 	// sacamos los políticos de la BD
 	$politicos = $poli->getPoliticos();
 	
 	foreach ($politicos as $row) {
-		$poli_list[] = $row['poli_nombre'];
+		$poli_list[] = strtolower($row['poli_nombre']);
 	}
 	
 	// regexp
@@ -54,33 +77,13 @@
 					$estadisticas[$rss_fuente][$poli_id] = $estadisticas[$rss_fuente][$poli_id]+1;
 				}
 				
+				// armamos estructura
 				$titulares[$poli_id]['poli_id'] = $poli_id;
+				$titulares[$poli_id]['proc_id'] = $proc_id;
 				$titulares[$poli_id]['poli_nombre'] = $index;
 				$titulares[$poli_id]['titulares'][] = $item;
 			}
 		}
-	}
-	
-	// inicio transacción
-	$db->beginTransaction();
-	
-	// guardamos proceso
-	$sql = "select coalesce(max(proc_id), 0)+1 as id from procesos";
-	$stmt = $db->prepare($sql);
-	$stmt->execute();
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
-	$proc_id = $row['id'];
-	
-	list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
-	$sql = "insert
-			into procesos 
-				(proc_id, proc_desde, proc_hasta)
-			values
-				(".$proc_id.", '".$init_fecha."', '".$end_fecha."')";
-				
-	if (!$db->exec($sql)) {
-		$db->rollback();
-		print_r($stmt->errorInfo());
 	}
 	
 	// guardamos estadísticas
@@ -130,47 +133,50 @@
 		$db->rollback();
 	}
 	
-	
-	$db->rollback();
-	
-	exit;
-	
-	
-	
 	// ordenamos segun cantidad de titulares de mayor a menor
 	$order = array();
 	foreach ($titulares as $row) {
-		$order[$row['poli_id']] = 
+		$order[$row['poli_id']] = sizeof($row['titulares']);
 		
 	}
+	arsort($order);
 	
+	// sacamos lugares
+	$keys = array_keys($order);
 	
-	$count = array();
-	foreach ($info_rss as $key => $val) {
-		$count[$key] = sizeof($val);
+	// guardamos lugares
+	$sql = "insert into lugares (proc_id, poli_id, luga_lugar) values ";
+	$values = array();
+	$lugar = 1;
+	foreach ($keys as $poli_id) {
+		$values[] = "(".$proc_id.", ".$poli_id.", ".$lugar.")";
+		$lugar++;
 	}
-	arsort($count);
-	$keys = array_keys($count);
-	$nombre = $keys[0];
 	
+	$sql .= implode(", ", $values);
 	
+	if (!$db->exec($sql)) {
+		print_r($stmt->errorInfo());
+		$db->rollback();
+	}
 	
+	// commit!
+	$db->commit();
 	
+	// primer lugar
+	$_1er_lugar = $titulares[$keys[0]];
 	
-	// array info
-	$index_info = array(
-		'info' => array(
-			'proc_id' => $proc_id,
-			'nombre'  => $nombre,
-			'total_titulares' => $total_titulares
-		),
-		'titulares' => $info_rss[$nombre]
-	);
+	// segundo lugar
+	$_2do_lugar = $titulares[$keys[1]];
+	
+	// tercer lugar
+	$_3er_lugar = $titulares[$keys[2]];
 	
 	// guardamos en Memcache
-	$memcache = new Memcache();
-	$memcache->connect($memcache_host, $memcache_port);
-	$memcache->set("index_info", $index_info, MEMCACHE_COMPRESSED, $memcache_expire);
-	$memcache->close();
+	$mc = new MemcacheClient();
+	$mc->set("index_info_1", $_1er_lugar, MEMCACHE_COMPRESSED, $memcache_expire);
+	$mc->set("index_info_2", $_2do_lugar, MEMCACHE_COMPRESSED, $memcache_expire);
+	$mc->set("index_info_3", $_3er_lugar, MEMCACHE_COMPRESSED, $memcache_expire);
+	$mc->close();
 	
 ?>

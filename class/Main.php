@@ -9,12 +9,18 @@ class Main {
 		}
 	}
 	
-	public function getIndexInfo($fecha) {
+	public function getIndexInfo($fecha, $lugar) {
+		if ($lugar == null) {
+			$lugar = 1;
+		}
+	
 		$sql = "select *
 				from procesos as proc
+				left join lugares as luga using (proc_id)
+				left join titulares as titu using (proc_id, poli_id)
 				left join politicos as poli using (poli_id)
-				left join titulares using (proc_id)
-				where proc.proc_desde = '".$fecha."'";
+				where proc.proc_desde = '".$fecha."'
+				and   luga.luga_lugar = ".$lugar;
 				
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute();
@@ -33,11 +39,13 @@ class Main {
 		}
 		
 		$info_array = array(
-			'proc_id' => $res[0]['proc_id'],
-			'nombre' => $res[0]['poli_nombre'],
-			'total_titulares' => $res[0]['proc_total_titulares']
+			'proc_id'     => $res[0]['proc_id'],
+			'poli_id'     => $res[0]['poli_id'],
+			'poli_nombre' => $res[0]['poli_nombre'],
+			'titulares'   => $titulares
 		);
-		return array('info' => $info_array, 'titulares' => $titulares);
+		
+		return $info_array;
 	}
 }
 

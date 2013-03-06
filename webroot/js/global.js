@@ -4,12 +4,14 @@ $(document).ready(function() {
 			var nota = $(this).attr('rel');
 			var session_id = $("#session_id").val();
 			var proc_id = $("#proc_id").val();
+			var poli_id = $("#poli_id").val();
+			var cookie_name = 'user_rank_'+ proc_id +'_'+ poli_id;
 			var ret;
 
 			$.ajax({
 				type: "POST",
 				url: "/rankear",
-				data: "session_id="+ session_id +"&nota="+ nota +"&proc_id="+ proc_id,
+				data: "cookie_name="+ cookie_name +"&session_id="+ session_id +"&nota="+ nota +"&proc_id="+ proc_id +"&poli_id="+ poli_id,
 				cache: false,
 				dataType: "json",
 				success: function(data) {

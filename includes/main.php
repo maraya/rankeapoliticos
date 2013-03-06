@@ -7,6 +7,8 @@
 	require_once dirname(dirname(__FILE__))."/includes/session.php";
 	
 	// Inicio
+	$lugar = isset($_GET['__lugar'])? htmlentities($_GET['__lugar']): null;
+	
 	if (isset($_GET['__fecha']) && isset($_GET['__hora'])) {
 		$fecha = $_GET['__fecha'];
 		$hora = $_GET['__hora'];
@@ -15,15 +17,9 @@
 		list ($init_fecha, $end_fecha) = getRangos($date->format("Y-m-d H:i:s"));
 		
 		$main = new Main();
-		$index_info = $main->getIndexInfo($init_fecha);
+		$index_info = $main->getIndexInfo($init_fecha, $lugar);
 	} else {
 		list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
-		
-		if (isset($_GET['__lugar'])) {
-			$lugar = htmlentities($_GET['__lugar']);
-		} else {
-			$lugar = null;
-		}
 		
 		$memcache = new MemcacheClient();
 		$index_info = $memcache->get("index_info", $lugar);
@@ -36,17 +32,29 @@
 	}
 	
 	$titulares = $index_info['titulares'];
-	$total_titulares = $index_info['info']['total_titulares'];
-	$nombre = ucfirst($index_info['info']['nombre']);
-	$proc_id = $index_info['info']['proc_id'];
+	$poli_nombre = ucfirst($index_info['poli_nombre']);
+	$proc_id = $index_info['proc_id'];
+	$poli_id = $index_info['poli_id'];
 ?>
 
 <div id="fb-root"></div>
 
 <div class="ganador">
 	<h2>Para el día <?php echo date("d-m-Y", strtotime($init_fecha)); ?> (entre las <?php echo date("H:i", strtotime($init_fecha)); ?> y las <?php echo date("H:i", strtotime($end_fecha)); ?>)</h2>
-	<h2>El ganador es:</h2>
-	<h1><?php echo $nombre; ?></h1>
+	<?php
+		if ($lugar == null || $lugar == 1) {
+			$gtext = "ganador";
+		} else if ($lugar == 2) {
+			$gtext = "2do lugar";
+		} else if ($lugar == 3) {
+			$gtext = "3er lugar";
+		}
+	?>
+	
+	<h2>El <?php echo $gtext; ?> es:</h2>
+	<h1><?php echo $poli_nombre; ?></h1>
+	
+	<p><a class="btn btn-primary" href="/2"><i class="icon-flag icon-white"></i> 2do Lugar</a> <a class="btn btn-primary" href="/3"><i class="icon-flag icon-white"></i> 3er Lugar</a></p>
 </div>
 
 <div class="row-fluid main_content">
@@ -64,17 +72,18 @@
 
 	<div class="row-fluid">
 		<div class="span4">
-			<h4>Rankea a <?php echo $nombre; ?></h4>
+			<h4>Rankea a <?php echo $poli_nombre; ?></h4>
 	
 			<span class="rank_stars">
 				<form>
 				<?php
 					for ($i=1; $i<=7; $i++) {
-						echo "<a href=\"javascript:;\" rel=\"".$i."\"><i class=\"icon-star\"></i></a>";
+						echo "<a href=\"javascript:;\" rel=\"".$i."\"><i title=\"".$i."\" class=\"icon-star\"></i></a>";
 					}
 				?>
 					<input type="hidden" id="session_id" value="<?php echo $_SESSION['session_id']; ?>" />
 					<input type="hidden" id="proc_id" value="<?php echo $proc_id; ?>" />
+					<input type="hidden" id="poli_id" value="<?php echo $poli_id; ?>" />
 				</form>
 				<p></p>
 			</span>
@@ -123,8 +132,14 @@
 				$date = DateTime::createFromFormat("Y-m-d H:i:s", $init_fecha);
 				$fecha = $date->format("d-m-Y");
 				$hora = $date->format("H:i");
+				
+				if ($lugar != null) {
+					$fb_comment_url = "http://rankeapoliticos.cl/".$lugar."/".$fecha."/".$hora;
+				} else {
+					$fb_comment_url = "http://rankeapoliticos.cl/".$fecha."/".$hora;
+				}
 			?>
-			<div class="fb-comments" data-href="http://rankeapoliticos.cl/<?php echo $fecha; ?>/<?php echo $hora; ?>" data-width="562" data-num-posts="10"></div>
+			<div class="fb-comments" data-href="<?php echo $fb_comment_url; ?>" data-width="562" data-num-posts="10"></div>
 		</div>
 	</div>
 </div>

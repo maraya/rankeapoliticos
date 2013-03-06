@@ -9,13 +9,13 @@ class Rank {
 		}
 	}
 	
-	public function putNota($nota, $proc_id) {
+	public function putNota($nota, $proc_id, $poli_id) {
 		$nota_fecha = date("Y-m-d H:i:s");
 		$sql = "insert
 				into notas
-					(nota_id, proc_id, nota_nota, nota_fecha)
+					(nota_id, proc_id, poli_id, nota_nota, nota_fecha)
 				values
-					((select coalesce(max(nota_id),0)+1 as id from notas), ".$proc_id.", ".$nota.", '".$nota_fecha."')";
+					((select coalesce(max(nota_id),0)+1 as id from notas), ".$proc_id.", ".$poli_id.", ".$nota.", '".$nota_fecha."')";
 					
 		$stmt = $this->db->prepare($sql);
 		
