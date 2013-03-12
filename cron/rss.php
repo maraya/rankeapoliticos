@@ -58,6 +58,7 @@
 	foreach ($fuentes as $row) {
 		$rss_url = $row['fuen_url'];
 		$rss_fuente = $row['fuen_id'];
+		$rss_desc = $row['fuen_desc'];
 	
 		$rss = new XML_RSS($rss_url);
 		$rss->parse();
@@ -83,6 +84,7 @@
 				$titulares[$poli_id]['fuen_id'] = $rss_fuente;
 				$titulares[$poli_id]['poli_nombre'] = $index;
 				$item['description'] = $description;
+				$item['fuen_desc'] = $rss_desc;
 				$titulares[$poli_id]['titulares'][] = $item;
 			}
 		}
@@ -175,11 +177,31 @@
 	// tercer lugar
 	$_3er_lugar = $titulares[$keys[2]];
 	
+	// info lateral
+	$info_lateral = array(
+		array(
+			'poli_id'     => $titulares[$keys[0]]['poli_id'],
+			'proc_id'     => $titulares[$keys[0]]['proc_id'],
+			'poli_nombre' => $titulares[$keys[0]]['poli_nombre']
+		),
+		array(
+			'poli_id'     => $titulares[$keys[1]]['poli_id'],
+			'proc_id'     => $titulares[$keys[1]]['proc_id'],
+			'poli_nombre' => $titulares[$keys[1]]['poli_nombre']
+		),
+		array(
+			'poli_id'     => $titulares[$keys[2]]['poli_id'],
+			'proc_id'     => $titulares[$keys[2]]['proc_id'],
+			'poli_nombre' => $titulares[$keys[2]]['poli_nombre']
+		)
+	);
+	
 	// guardamos en Memcache
 	$mc = new MemcacheClient();
 	$mc->set("index_info_1", $_1er_lugar, MEMCACHE_COMPRESSED, $memcache_expire);
 	$mc->set("index_info_2", $_2do_lugar, MEMCACHE_COMPRESSED, $memcache_expire);
 	$mc->set("index_info_3", $_3er_lugar, MEMCACHE_COMPRESSED, $memcache_expire);
+	$mc->set("info_lateral", $info_lateral, MEMCACHE_COMPRESSED, $memcache_expire);
 	$mc->close();
 	
 ?>

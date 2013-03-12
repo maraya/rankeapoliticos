@@ -1,13 +1,15 @@
 $(document).ready(function() {
+
 	$(".rank_stars a").each(function() {
 		$(this).on("click", function() {
-			var nota = $(this).attr('rel');
-			var session_id = $("#session_id").val();
-			var proc_id = $("#proc_id").val();
-			var poli_id = $("#poli_id").val();
+			var t = $(this);
+			var nota = $(t).attr('rel');
+			var session_id = $(t).parent().parent().find(".session_id").val();
+			var proc_id = $(t).parent().parent().find(".proc_id").val();
+			var poli_id = $(t).parent().parent().find(".poli_id").val();
 			var cookie_name = 'user_rank_'+ proc_id +'_'+ poli_id;
 			var ret;
-
+			
 			$.ajax({
 				type: "POST",
 				url: "/rankear",
@@ -23,12 +25,16 @@ $(document).ready(function() {
 				},
 				complete: function() {
 					if (ret == "ok") {
-						$(".rank_stars p").html("<strong>Gracias por su calificación</strong>");
+						$(t).parent().parent().find(".tooltip_msg").attr("title", "Gracias por su calificación").tooltip('show');
 					} else {
-						$(".rank_stars p").html("<strong>Usted ya ha calificado a este político</strong>");
+						$(t).parent().parent().find(".tooltip_msg").attr("title", "Usted ya ha calificado a este político").tooltip('show');
 					}
 				}
 			});
+		}).on('mouseover', function() {
+			$(this).find("i").addClass("icon-white");
+		}).on('mouseout', function() {
+			$(this).find("i").removeClass("icon-white");
 		});
 	});
 });

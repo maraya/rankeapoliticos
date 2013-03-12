@@ -22,7 +22,8 @@
 		list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
 		
 		$memcache = new MemcacheClient();
-		$index_info = $memcache->get("index_info", $lugar);
+		$index_info = $memcache->getIndexInfo("index_info", $lugar);
+		$lateral_info = $memcache->get("info_lateral");
 		$memcache->close();
 	}
 	
@@ -32,7 +33,7 @@
 	}
 	
 	$titulares = $index_info['titulares'];
-	$poli_nombre = ucfirst($index_info['poli_nombre']);
+	$poli_nombre = ucwords($index_info['poli_nombre']);
 	$proc_id = $index_info['proc_id'];
 	$poli_id = $index_info['poli_id'];
 ?>
@@ -54,40 +55,67 @@
 	<h2>El <?php echo $gtext; ?> es:</h2>
 	<h1><?php echo $poli_nombre; ?></h1>
 	
-	<p><a class="btn btn-primary" href="/2"><i class="icon-flag icon-white"></i> 2do Lugar</a> <a class="btn btn-primary" href="/3"><i class="icon-flag icon-white"></i> 3er Lugar</a></p>
+	<?php
+		$_2do_lugar = ucwords($lateral_info[1]['poli_nombre']);
+		$_3er_lugar = ucwords($lateral_info[2]['poli_nombre']);
+	?>
+	
+	<p><a class="btn btn-primary" href="/2"><i class="icon-flag icon-white"></i> <strong><?php echo $_2do_lugar; ?> (2do)</strong></a> <a class="btn btn-primary" href="/3"><i class="icon-flag icon-white"></i> <strong><?php echo $_3er_lugar; ?> (3er)</strong></a></p>
 </div>
 
 <div class="row-fluid main_content">
-
-	<div class="span12 well sidebar-nav">
-		<h3>Titulares</h3>
-		<ul>
-		<?php
-			foreach ($titulares as $row) {
-				echo "<li><a href=\"".$row['link']."\" target=\"_blank\">".$row['title']."</a></li>\n";
-			}
-		?>
-		</ul>
+	<div class="span12">
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>Titular</th>
+					<th>Fuente</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+					foreach ($titulares as $row) {
+						echo "<tr>";
+						echo "	<td><a href=\"".$row['link']."\" target=\"_blank\">".$row['title']."</a></td>\n";
+						echo "  <td>".$row['fuen_desc']."</td>";
+						echo "</tr>";
+					}	
+				?>
+			</tbody>
+		</table>
 	</div>
-
+	
 	<div class="row-fluid">
 		<div class="span4">
-			<h4>Rankea a <?php echo $poli_nombre; ?></h4>
+			
+			<?php
+				$row_count = 0;
+				foreach ($lateral_info as $row) {
+					if ($row_count == 0) { $lugar_label = "1er lugar"; }
+					elseif ($row_count == 1) { $lugar_label = "2do lugar"; }
+					elseif ($row_count == 2) { $lugar_label = "3er lugar"; }
+			?>
+				<h4><?php echo $lugar_label; ?>: <?php echo ucwords($row['poli_nombre']); ?></h4>
 	
-			<span class="rank_stars">
-				<form>
-				<?php
-					for ($i=1; $i<=7; $i++) {
-						echo "<a href=\"javascript:;\" rel=\"".$i."\"><i title=\"".$i."\" class=\"icon-star\"></i></a>";
-					}
-				?>
-					<input type="hidden" id="session_id" value="<?php echo $_SESSION['session_id']; ?>" />
-					<input type="hidden" id="proc_id" value="<?php echo $proc_id; ?>" />
-					<input type="hidden" id="poli_id" value="<?php echo $poli_id; ?>" />
-				</form>
-				<p></p>
-			</span>
-		
+				<span class="rank_stars">
+					<form>
+						<p><strong>Rankear: </strong>
+						<?php
+							for ($i=1; $i<=7; $i++) {
+								echo "<a href=\"javascript:;\" rel=\"".$i."\"><i title=\"".$i."\" class=\"icon-star\"></i></a>";
+							}
+						?>
+							<span class="tooltip_msg" data-placement="right" title=""></span>
+						</p>
+						<input type="hidden" class="session_id" value="<?php echo $_SESSION['session_id']; ?>" />
+						<input type="hidden" class="proc_id" value="<?php echo $row['proc_id']; ?>" />
+						<input type="hidden" class="poli_id" value="<?php echo $row['poli_id']; ?>" />
+					</form>
+				</span>
+			<?php
+					$row_count++;
+				}
+			?>
 			<hr />
 			<h4>Rankeados Anteriores</h4>
 		

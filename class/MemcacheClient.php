@@ -9,8 +9,12 @@ class MemcacheClient {
 		$this->mc = new Memcache();
 		$this->mc->connect($memcache_host, $memcache_port);
 	}
+	
+	public function get($key) {
+		return $this->mc->get($key);
+	}
 
-	public function get($key, $lugar) {
+	public function getIndexInfo($key, $lugar) {
 		if ($lugar == null) {
 			$lugar = 1;
 		}
