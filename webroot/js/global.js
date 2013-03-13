@@ -24,10 +24,11 @@ $(document).ready(function() {
 					}
 				},
 				complete: function() {
+					$(t).parent().parent().find(".tooltip_msg").tooltip('destroy');
 					if (ret == "ok") {
-						$(t).parent().parent().find(".tooltip_msg").attr("title", "Gracias por su calificación").tooltip('show');
+						$(t).parent().parent().find(".tooltip_msg").removeAttr("title").attr("title", "Gracias por su calificación").tooltip('show');
 					} else {
-						$(t).parent().parent().find(".tooltip_msg").attr("title", "Usted ya ha calificado a este político").tooltip('show');
+						$(t).parent().parent().find(".tooltip_msg").removeAttr("title").attr("title", "Usted ya ha calificado a este político").tooltip('show');
 					}
 				}
 			});

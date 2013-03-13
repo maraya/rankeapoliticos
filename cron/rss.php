@@ -72,6 +72,7 @@
 				
 				// datos de frecuencia
 				$poli_id = $poli->getPoliId($index);
+				
 				if (!isset($estadisticas[$rss_fuente][$poli_id])) {
 					$estadisticas[$rss_fuente][$poli_id] = 1;
 				} else {
@@ -79,12 +80,22 @@
 				}
 				
 				// armamos estructura
-				$titulares[$poli_id]['poli_id'] = $poli_id;
-				$titulares[$poli_id]['proc_id'] = $proc_id;
-				$titulares[$poli_id]['fuen_id'] = $rss_fuente;
-				$titulares[$poli_id]['poli_nombre'] = $index;
+				if (!isset($titulares[$poli_id]['poli_id'])) {
+					$titulares[$poli_id]['poli_id'] = $poli_id;
+				}
+				
+				if (!isset($titulares[$poli_id]['proc_id'])) {
+					$titulares[$poli_id]['proc_id'] = $proc_id;
+				}
+				
+				if (!isset($titulares[$poli_id]['poli_nombre'])) {
+					$titulares[$poli_id]['poli_nombre'] = $index;
+				}
+				
 				$item['description'] = $description;
 				$item['fuen_desc'] = $rss_desc;
+				$item['fuen_id'] = $rss_fuente;
+				
 				$titulares[$poli_id]['titulares'][] = $item;
 			}
 		}
@@ -116,12 +127,10 @@
 	$values = array();
 	foreach ($titulares as $row) {
 		$poli_id = $row['poli_id'];
-		$fuen_id = $row['fuen_id'];
 		
 		foreach ($row['titulares'] as $titu) {
+			$fuen_id = $titu['fuen_id'];
 			$max = "select coalesce(max(titu_id), 0)+".$i." as id from titulares";
-			
-			//echo $titu['pubdate']."\n";
 			
 			$titu['pubdate'] = date("Y-m-d H:i:s", strtotime($titu['pubdate']));
 			

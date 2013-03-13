@@ -18,6 +18,8 @@
 		
 		$main = new Main();
 		$index_info = $main->getIndexInfo($init_fecha, $lugar);
+		$lateral_info = $main->getLateralInfo($init_fecha);
+		$rank_notas = $main->getRankNotas($init_fecha);
 	} else {
 		list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
 		
@@ -25,6 +27,9 @@
 		$index_info = $memcache->getIndexInfo("index_info", $lugar);
 		$lateral_info = $memcache->get("info_lateral");
 		$memcache->close();
+		
+		$main = new Main();
+		$rank_notas = $main->getRankNotas($init_fecha);
 	}
 	
 	if (!is_array($index_info)) {
@@ -60,7 +65,7 @@
 		$_3er_lugar = ucwords($lateral_info[2]['poli_nombre']);
 	?>
 	
-	<p><a class="btn btn-primary" href="/2"><i class="icon-flag icon-white"></i> <strong><?php echo $_2do_lugar; ?> (2do)</strong></a> <a class="btn btn-primary" href="/3"><i class="icon-flag icon-white"></i> <strong><?php echo $_3er_lugar; ?> (3er)</strong></a></p>
+	<p><a class="btn btn-primary" href="/2"><i class="icon-flag icon-white"></i> <strong><?php echo $_2do_lugar; ?> (2do lugar)</strong></a> <a class="btn btn-primary" href="/3"><i class="icon-flag icon-white"></i> <strong><?php echo $_3er_lugar; ?> (3er lugar)</strong></a></p>
 </div>
 
 <div class="row-fluid main_content">
@@ -87,7 +92,7 @@
 	
 	<div class="row-fluid">
 		<div class="span4">
-			
+			<h4>Ranking titulares</h4>
 			<?php
 				$row_count = 0;
 				foreach ($lateral_info as $row) {
@@ -95,11 +100,11 @@
 					elseif ($row_count == 1) { $lugar_label = "2do lugar"; }
 					elseif ($row_count == 2) { $lugar_label = "3er lugar"; }
 			?>
-				<h4><?php echo $lugar_label; ?>: <?php echo ucwords($row['poli_nombre']); ?></h4>
+				<h5><?php echo $lugar_label; ?>: <?php echo ucwords($row['poli_nombre']); ?></h5>
 	
 				<span class="rank_stars">
 					<form>
-						<p><strong>Rankear: </strong>
+						<p>Rankear: 
 						<?php
 							for ($i=1; $i<=7; $i++) {
 								echo "<a href=\"javascript:;\" rel=\"".$i."\"><i title=\"".$i."\" class=\"icon-star\"></i></a>";
@@ -116,6 +121,24 @@
 					$row_count++;
 				}
 			?>
+			
+			<hr />
+			<h4>Ranking rankeapoliticos.cl</h4>
+			
+			<?php
+				$row_count = 0;
+				foreach ($rank_notas as $row) {
+					if ($row_count == 0) { $lugar_label = "1er lugar"; }
+					elseif ($row_count == 1) { $lugar_label = "2do lugar"; }
+					elseif ($row_count == 2) { $lugar_label = "3er lugar"; }
+			?>
+				<h5><?php echo $lugar_label; ?>: <?php echo ucwords($row['poli_nombre']); ?></h5>
+				<span><?php echo number_format($row['promedio'], 1, ",", "."); ?> (<?php echo $row['total_notas']; ?> calificaciones)</span>
+			<?php
+					$row_count++;
+				}
+			?>
+			
 			<hr />
 			<h4>Rankeados Anteriores</h4>
 		
