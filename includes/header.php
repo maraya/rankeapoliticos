@@ -8,7 +8,7 @@
 	<meta property="og:image:width" content="66" />
 	<meta property="og:image:height" content="90" />
 	<meta property="og:url" content="http://rankeapoliticos.cl" />
-	<meta property="og:description" content="Rankeapoliticos.cl, sitio de rankings de políticos nacionales e internacionales." />
+	<meta property="og:description" content="Rankeapoliticos.cl, sitio de ranking de politicos nacionales e internacionales en la prensa." />
 	<!--<meta property="og:description" content="Sitio de información estadística de politicos en la prensa." />-->
 	<meta property="fb:admins" content="1185063875"/>
 	<meta property="fb:app_id" content="123861350968148"/>
