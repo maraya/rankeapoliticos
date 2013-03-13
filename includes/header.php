@@ -24,7 +24,7 @@
 			<ul class="nav nav-pills pull-right">
 				<li <?php if (!isset($_GET['__sec'])) { echo "class='active'"; } ?>><a href="/">Home</a></li>
 				<!-- sacamos mientras el ranking -->
-				<!--<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "ranking") { echo "class='active'"; } ?>><a href="/ranking">Ranking</a></li>-->
+				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "ranking") { echo "class='active'"; } ?>><a href="/ranking">Ranking</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "faq") { echo "class='active'"; } ?>><a href="/faq">FAQ</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "contacto") { echo "class='active'"; } ?>><a href="/contacto">Contacto</a></li>
 			</ul>

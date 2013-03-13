@@ -2,12 +2,15 @@
 	require_once dirname(dirname(__FILE__))."/config/config.php";
 	require_once dirname(dirname(__FILE__))."/class/DB.php";
 	require_once dirname(dirname(__FILE__))."/class/Main.php";
+	require_once dirname(dirname(__FILE__))."/class/Rank.php";
 	require_once dirname(dirname(__FILE__))."/class/MemcacheClient.php";
 	require_once dirname(dirname(__FILE__))."/includes/functions.php";
 	require_once dirname(dirname(__FILE__))."/includes/session.php";
 	
 	// Inicio
 	$lugar = isset($_GET['__lugar'])? htmlentities($_GET['__lugar']): null;
+	$main = new Main();
+	$rank = new Rank();
 	
 	if (isset($_GET['__fecha']) && isset($_GET['__hora'])) {
 		$fecha = $_GET['__fecha'];
@@ -16,10 +19,11 @@
 		$date = DateTime::createFromFormat("d-m-Y H:i:s", $fecha." ".$hora.":00");
 		list ($init_fecha, $end_fecha) = getRangos($date->format("Y-m-d H:i:s"));
 		
-		$main = new Main();
 		$index_info = $main->getIndexInfo($init_fecha, $lugar);
 		$lateral_info = $main->getLateralInfo($init_fecha);
-		$rank_notas = $main->getRankNotas($init_fecha);
+		$rank_notas = $rank->getRankNotas($init_fecha);
+		$rank_resumen = $rank->getRankResumen(5);
+		
 	} else {
 		list ($init_fecha, $end_fecha) = getRangos(date("Y-m-d H:i:s"));
 		
@@ -28,8 +32,8 @@
 		$lateral_info = $memcache->get("info_lateral");
 		$memcache->close();
 		
-		$main = new Main();
-		$rank_notas = $main->getRankNotas($init_fecha);
+		$rank_notas = $rank->getRankNotas($init_fecha);
+		$rank_resumen = $rank->getRankResumen(5);
 	}
 	
 	if (!is_array($index_info)) {
@@ -123,7 +127,7 @@
 			?>
 			
 			<hr />
-			<h4>Ranking rankeapoliticos.cl</h4>
+			<h4>Ranking del periodo</h4>
 			
 			<?php
 				$row_count = 0;
@@ -140,6 +144,27 @@
 			?>
 			
 			<hr />
+			<h4>Ranking general</h4>
+			
+			<?php
+				$row_count = 0;
+				foreach ($rank_resumen as $row) {
+					if ($row_count == 0) { $lugar_label = "1er lugar"; }
+					elseif ($row_count == 1) { $lugar_label = "2do lugar"; }
+					elseif ($row_count == 2) { $lugar_label = "3er lugar"; }
+					elseif ($row_count == 3) { $lugar_label = "4to lugar"; }
+					elseif ($row_count == 4) { $lugar_label = "5to lugar"; }
+			?>
+				<h5><?php echo $lugar_label; ?>: <?php echo ucwords($row['poli_nombre']); ?></h5>
+				<span><?php echo number_format($row['promedio'], 1, ",", "."); ?> (<?php echo $row['total_notas']; ?> calificaciones)</span>
+			<?php
+					$row_count++;
+				}
+			?>
+			<br />
+			<br />
+			<a class="btn btn-mini btn-primary" href="/ranking"><i class="icon-plus-sign icon-white"></i><strong> Ver todos</strong></a> 
+			<hr />
 			<h4>Rankeados Anteriores</h4>
 		
 			<ul>
@@ -152,6 +177,7 @@
 				}
 			?>
 			</ul>
+			
 			<hr />
 		
 			<script>
@@ -190,7 +216,7 @@
 					$fb_comment_url = "http://rankeapoliticos.cl/".$fecha."/".$hora;
 				}
 			?>
-			<div class="fb-comments" data-href="<?php echo $fb_comment_url; ?>" data-width="562" data-num-posts="10"></div>
+			<div class="fb-comments" data-href="<?php echo $fb_comment_url; ?>" data-width="562" data-num-posts="10"></div>			
 		</div>
 	</div>
 </div>

@@ -68,26 +68,6 @@ class Main {
 		
 		return $res;
 	}
-	
-	public function getRankNotas($init_fecha) {
-		$sql = "select poli.poli_nombre
-					  ,coalesce(avg(nota.nota_nota), 0) as promedio
-					  ,count(nota.nota_id) as total_notas
-				from lugares as luga
-				join procesos as proc using (proc_id)
-				left join notas as nota using (proc_id, poli_id)
-				join politicos as poli using (poli_id)
-				where proc.proc_desde = '".$init_fecha."'
-				and   luga.luga_lugar in (1, 2, 3)
-				group by poli.poli_nombre
-				order by promedio desc";
-				
-		$stmt = $this->db->prepare($sql);
-		$stmt->execute();
-		$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		
-		return $res;
-	}
 }
 
 ?>
