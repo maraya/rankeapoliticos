@@ -5,7 +5,11 @@
 	<meta property="og:title" content="Rankea políticos!" />
 	<meta property="og:type" content="cause" />
 	<meta property="og:image" content="http://rankeapoliticos.cl/img/fb-icon.png" /> 
-	<meta property="og:url" content="http://rankeapoliticos.cl" /> 
+	<meta property="og:image:width" content="66" />
+	<meta property="og:image:height" content="90" />
+	<meta property="og:url" content="http://rankeapoliticos.cl" />
+	<meta property="og:description" content="Rankeapoliticos.cl, sitio de rankings de políticos nacionales e internacionales." />
+	<!--<meta property="og:description" content="Sitio de información estadística de politicos en la prensa." />-->
 	<meta property="fb:admins" content="1185063875"/>
 	<meta property="fb:app_id" content="123861350968148"/>
 	<title>Rankea políticos!</title>
@@ -23,7 +27,6 @@
 		<div class="masthead">
 			<ul class="nav nav-pills pull-right">
 				<li <?php if (!isset($_GET['__sec'])) { echo "class='active'"; } ?>><a href="/">Home</a></li>
-				<!-- sacamos mientras el ranking -->
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "ranking") { echo "class='active'"; } ?>><a href="/ranking">Ranking</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "faq") { echo "class='active'"; } ?>><a href="/faq">FAQ</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "contacto") { echo "class='active'"; } ?>><a href="/contacto">Contacto</a></li>
