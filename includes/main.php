@@ -67,9 +67,14 @@
 	<?php
 		$_2do_lugar = ucwords($lateral_info[1]['poli_nombre']);
 		$_3er_lugar = ucwords($lateral_info[2]['poli_nombre']);
+		$vars = "";
+
+		if (isset($_GET['__fecha']) && isset($_GET['__hora'])) {
+			$vars = "/".$_GET['__fecha']."/".$_GET['__hora'];
+		}
 	?>
 	
-	<p><a class="btn btn-primary" href="/2"><i class="icon-flag icon-white"></i> <strong><?php echo $_2do_lugar; ?> (2do lugar)</strong></a> <a class="btn btn-primary" href="/3"><i class="icon-flag icon-white"></i> <strong><?php echo $_3er_lugar; ?> (3er lugar)</strong></a></p>
+	<p><a class="btn btn-primary" href="/2<?php echo $vars; ?>"><i class="icon-flag icon-white"></i> <strong><?php echo $_2do_lugar; ?> (2do lugar)</strong></a> <a class="btn btn-primary" href="/3<?php echo $vars; ?>"><i class="icon-flag icon-white"></i> <strong><?php echo $_3er_lugar; ?> (3er lugar)</strong></a></p>
 </div>
 
 <div class="row-fluid main_content">
