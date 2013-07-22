@@ -19,6 +19,8 @@
 	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
 	<script src="/js/jquery.min.js" type="text/javascript"></script>
 	<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="/js/highcharts.js"></script>
+	<script src="/js/exporting.js"></script>
 	<script src="/js/global.js" type="text/javascript"></script>
 </head>
 
@@ -28,6 +30,7 @@
 			<ul class="nav nav-pills pull-right">
 				<li <?php if (!isset($_GET['__sec'])) { echo "class='active'"; } ?>><a href="/">Home</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "ranking") { echo "class='active'"; } ?>><a href="/ranking">Ranking</a></li>
+				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "estadisticas") { echo "class='active'"; } ?>><a href="/estadisticas">Estadísticas</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "faq") { echo "class='active'"; } ?>><a href="/faq">FAQ</a></li>
 				<li <?php if (isset($_GET['__sec']) && $_GET['__sec'] == "contacto") { echo "class='active'"; } ?>><a href="/contacto">Contacto</a></li>
 			</ul>

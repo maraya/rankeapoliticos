@@ -12,6 +12,8 @@
 		include_once dirname(dirname(__FILE__))."/includes/faq.php";
 	} elseif ($_GET['__sec'] == "contacto") {
 		include_once dirname(dirname(__FILE__))."/includes/contacto.php";
+	} elseif ($_GET['__sec'] == "estadisticas") {
+		include_once dirname(dirname(__FILE__))."/includes/estadisticas.php";
 	} else {
 		// 404
 		include_once dirname(dirname(__FILE__))."/includes/404.php";
