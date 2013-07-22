@@ -133,6 +133,8 @@
 			$max = "select coalesce(max(titu_id), 0)+".$i." as id from titulares";
 			
 			$titu['pubdate'] = date("Y-m-d H:i:s", strtotime($titu['pubdate']));
+			$titu['title'] = preg_replace("/\'/", null, $titu['title']);
+			$titu['description'] = preg_replace("/\'/", null, $titu['description']);
 			
 			$values[] =  "((".$max."), ".$proc_id.", ".$fuen_id.", '".addslashes($titu['title'])."', '".addslashes($titu['description'])."', '".$titu['link']."', '".$titu['pubdate']."', ".$poli_id.")";
 			$i++;
